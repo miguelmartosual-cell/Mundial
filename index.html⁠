@@ -7,7 +7,7 @@
     <style>
         :root {
             --bg-main: #0f172a;
-            --bg-card: #1e293b;r
+            --bg-card: #1e293b;
             --primary: #38bdf8;
             --primary-hover: #0ea5e9;
             --success: #10b981;
@@ -44,7 +44,6 @@
             text-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
         }
 
-        /* Panel de Estadísticas y Filtros */
         .stats-panel {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -88,7 +87,6 @@
             border-radius: 12px;
         }
 
-        /* Lista de partidos */
         .partido-list {
             display: flex;
             flex-direction: column;
@@ -151,7 +149,6 @@
             gap: 8px;
         }
 
-        /* Controles del marcador */
         .score-control {
             display: flex;
             align-items: center;
@@ -184,7 +181,6 @@
             color: var(--primary);
         }
 
-        /* Acción de visto */
         .action-area {
             display: flex;
             align-items: center;
@@ -235,7 +231,7 @@
                 <button class="tab-btn" onclick="filtrar('pendientes', this)">Pendientes</button>
                 <button class="tab-btn" onclick="filtrar('vistos', this)">Vistos</button>
             </div>
-            <div class="counter-badge" id="progreso-texto">Cargando progreso...</div>
+            <div class="counter-badge" id="progreso-texto">Cargando...</div>
         </div>
 
         <div class="partido-list" id="partidos-container"></div>
@@ -258,18 +254,36 @@
             { id: 13, fecha: "15 de Junio", grupo: "Grupo G", equipo1: "España 🇪🇸", equipo2: "Cabo Verde 🇨🇻", goles1: 0, goles2: 0, visto: true }
         ];
 
-        let partidos = JSON.parse(localStorage.getItem('mundial_2026_v4')) || partidosIniciales;
+        let partidos;
+        
+        try {
+            const localData = localStorage.getItem('mundial_2026_final_v5');
+            if (localData) {
+                partidos = JSON.parse(localData);
+                if (!Array.isArray(partidos) || partidos.length === 0 || !partidos[0].grupo) {
+                    throw new Error("Reset manual");
+                }
+            } else {
+                partidos = [...partidosIniciales];
+            }
+        } catch (e) {
+            partidos = [...partidosIniciales];
+            localStorage.setItem('mundial_2026_final_v5', JSON.stringify(partidos));
+        }
+
         let filtroActual = 'todos';
 
         function guardarDatos() {
-            localStorage.setItem('mundial_2026_v4', JSON.stringify(partidos));
+            try {
+                localStorage.setItem('mundial_2026_final_v5', JSON.stringify(partidos));
+            } catch(e) { console.error(e); }
             actualizarPanel();
         }
 
         function actualizarPanel() {
             const total = partidos.length;
             const vistos = partidos.filter(p => p.visto).length;
-            document.getElementById('progreso-texto').innerText = `Vistos: ${vistos} de ${total} partidos`;
+            document.getElementById('progreso-texto').innerText = `Vistos: ${vistos} de ${total}`;
         }
 
         function cambiarGoles(id, equipoNum, cambio) {
@@ -303,6 +317,7 @@
 
         function render() {
             const container = document.getElementById('partidos-container');
+            if (!container) return;
             container.innerHTML = '';
 
             const partidosFiltrados = partidos.filter(p => {
@@ -312,7 +327,7 @@
             });
 
             if(partidosFiltrados.length === 0) {
-                container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">No hay partidos en esta categoría.</p>`;
+                container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">No hay partidos aquí.</p>`;
                 return;
             }
 
@@ -355,7 +370,6 @@
             });
         }
 
-        // Inicializar aplicación
         actualizarPanel();
         render();
     </script>
