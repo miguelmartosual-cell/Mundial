@@ -82,12 +82,10 @@
     </header>
 
     <div class="container" id="lista-partidos">
-        <!-- Los partidos se generarán dinámicamente con JavaScript -->
-    </div>
+        </div>
 
     <script>
-        // Lista con el calendario real jugado hasta el 15 de Junio
-        // Ya vienen preconfigurados con tus partidos vistos
+        // Lista corregida sin espacios en la variable
         const partidosIniciales = [
             { id: 1, fecha: "11 de Junio", equipo1: "México 🇲🇽", equipo2: "Sudáfrica 🇿🇦", goles1: 2, goles2: 0, visto: true },
             { id: 2, fecha: "11 de Junio", equipo1: "Corea del Sur 🇰🇷", equipo2: "Chequia 🇨🇿", goles1: 2, goles2: 1, visto: false },
@@ -104,12 +102,18 @@
             { id: 13, fecha: "15 de Junio", equipo1: "España 🇪🇸", equipo2: "Cabo Verde 🇨🇻", goles1: 0, goles2: 0, visto: true }
         ];
 
-        // Cargar datos guardados del almacenamiento local (LocalStorage) o usar los iniciales
-        let partidos = JSON.parse(localStorage.getItem('mundial_partidos')) || partidosIniciales;
-
-        // Si es la primera vez que entras pero ya hay cambios en partidosIniciales, actualizamos el almacenamiento
-        if (!localStorage.getItem('mundial_partidos')) {
-            localStorage.setItem('mundial_partidos', JSON.stringify(partidosIniciales));
+        // Forzamos la actualización para limpiar el localStorage antiguo con fallos
+        let partidos;
+        try {
+            const guardados = localStorage.getItem('mundial_partidos_v3');
+            if (guardados) {
+                partidos = JSON.parse(guardados);
+            } else {
+                partidos = partidosIniciales;
+                localStorage.setItem('mundial_partidos_v3', JSON.stringify(partidosIniciales));
+            }
+        } catch (e) {
+            partidos = partidosIniciales;
         }
 
         const container = document.getElementById('lista-partidos');
@@ -139,27 +143,28 @@
             });
         }
 
-        // Función para marcar/desmarcar como visto
         window.toggleVisto = function(id) {
             const partido = partidos.find(p => p.id === id);
-            partido.visto = !partido.visto;
-            actualizarStorage();
+            if (partido) {
+                partido.visto = !partido.visto;
+                actualizarStorage();
+            }
         }
 
-        // Función para guardar los goles
         window.guardarGoles = function(id, equipoNum, valor) {
             const partido = partidos.find(p => p.id === id);
-            if(equipoNum === 1) partido.goles1 = valor === '' ? null : parseInt(valor);
-            if(equipoNum === 2) partido.goles2 = valor === '' ? null : parseInt(valor);
-            actualizarStorage(false);
+            if (partido) {
+                if(equipoNum === 1) partido.goles1 = valor === '' ? null : parseInt(valor);
+                if(equipoNum === 2) partido.goles2 = valor === '' ? null : parseInt(valor);
+                actualizarStorage(false);
+            }
         }
 
         function actualizarStorage(recargar = true) {
-            localStorage.setItem('mundial_partidos', JSON.stringify(partidos));
+            localStorage.setItem('mundial_partidos_v3', JSON.stringify(partidos));
             if (recargar) renderPartidos();
         }
 
-        // Arrancar la web
         renderPartidos();
     </script>
 </body>
