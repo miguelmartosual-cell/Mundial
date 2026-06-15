@@ -30,6 +30,8 @@
         .card-header { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; }
         .team-container { display: flex; flex-direction: column; gap: 12px; flex: 1; }
         .team-row { display: flex; align-items: center; justify-content: space-between; font-size: 1.05rem; font-weight: 600; }
+        .team-info { display: flex; align-items: center; gap: 10px; }
+        .flag-img { width: 24px; height: 16px; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); object-fit: cover; }
         .score-control { display: flex; align-items: center; gap: 6px; }
         .score-btn { background: rgba(255,255,255,0.08); border: none; color: var(--text-main); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
         .score-btn:hover { background: rgba(255,255,255,0.15); }
@@ -43,8 +45,8 @@
 <body>
 <div class="container">
     <header>
-        <h1>🏆 Mi Diario del Mundial</h1>
-        <p style="color:var(--text-muted);margin:0;">Fase de Grupos · Mundial 2026</p>
+        <h1>🏆 Mi Diario del Mundial 2026</h1>
+        <p style="color:var(--text-muted);margin:0;">Fase de Grupos (72 Partidos Completo)</p>
     </header>
     <div class="stats-panel">
         <div class="tabs">
@@ -57,27 +59,110 @@
     <div class="partido-list" id="partidos-container"></div>
 </div>
 <script>
-const STORAGE_KEY = 'mundial_2026_v1';
+const STORAGE_KEY = 'mundial_2026_vfinal';
+
 const DEFAULTS = [
-    { id:1,  fecha:"11 Jun", grupo:"Grupo A", equipo1:"México 🇲🇽",          equipo2:"Sudáfrica 🇿🇦",    goles1:2, goles2:0, visto:true  },
-    { id:2,  fecha:"11 Jun", grupo:"Grupo B", equipo1:"Corea del Sur 🇰🇷",   equipo2:"Chequia 🇨🇿",      goles1:2, goles2:1, visto:false },
-    { id:3,  fecha:"12 Jun", grupo:"Grupo A", equipo1:"Canadá 🇨🇦",          equipo2:"Bosnia y Her. 🇧🇦", goles1:1, goles2:1, visto:true  },
-    { id:4,  fecha:"12 Jun", grupo:"Grupo C", equipo1:"Estados Unidos 🇺🇸",  equipo2:"Paraguay 🇵🇾",     goles1:4, goles2:1, visto:false },
-    { id:5,  fecha:"13 Jun", grupo:"Grupo C", equipo1:"Qatar 🇶🇦",           equipo2:"Suiza 🇨🇭",        goles1:1, goles2:1, visto:true  },
-    { id:6,  fecha:"13 Jun", grupo:"Grupo D", equipo1:"Brasil 🇧🇷",          equipo2:"Marruecos 🇲🇦",    goles1:1, goles2:1, visto:true  },
-    { id:7,  fecha:"13 Jun", grupo:"Grupo D", equipo1:"Haití 🇭🇹",           equipo2:"Escocia 🏴󠁧󠁢󠁳󠁣󠁴󠁿",    goles1:0, goles2:1, visto:true  },
-    { id:8,  fecha:"13 Jun", grupo:"Grupo E", equipo1:"Australia 🇦🇺",       equipo2:"Turquía 🇹🇷",      goles1:2, goles2:0, visto:false },
-    { id:9,  fecha:"14 Jun", grupo:"Grupo E", equipo1:"Alemania 🇩🇪",        equipo2:"Curazao 🇨🇼",      goles1:7, goles2:1, visto:true  },
-    { id:10, fecha:"14 Jun", grupo:"Grupo F", equipo1:"Países Bajos 🇳🇱",    equipo2:"Japón 🇯🇵",        goles1:2, goles2:2, visto:true  },
-    { id:11, fecha:"14 Jun", grupo:"Grupo F", equipo1:"Costa de Marfil 🇨🇮", equipo2:"Ecuador 🇪🇨",      goles1:1, goles2:0, visto:true  },
-    { id:12, fecha:"14 Jun", grupo:"Grupo G", equipo1:"Suecia 🇸🇪",          equipo2:"Túnez 🇹🇳",        goles1:5, goles2:1, visto:false },
-    { id:13, fecha:"15 Jun", grupo:"Grupo G", equipo1:"España 🇪🇸",          equipo2:"Cabo Verde 🇨🇻",   goles1:0, goles2:0, visto:true  }
+    // GRUPO A
+    { id:1,  fecha:"11 Jun", grupo:"Grupo A", eq1:"México", code1:"mx", eq2:"Sudáfrica", code2:"za", goles1:0, goles2:0, visto:false },
+    { id:2,  fecha:"12 Jun", grupo:"Grupo A", eq1:"Canadá", code1:"ca", eq2:"Bosnia y Her.", code2:"ba", goles1:0, goles2:0, visto:false },
+    { id:3,  fecha:"17 Jun", grupo:"Grupo A", eq1:"México", code1:"mx", eq2:"Canadá", code2:"ca", goles1:0, goles2:0, visto:false },
+    { id:4,  fecha:"17 Jun", grupo:"Grupo A", eq1:"Sudáfrica", code1:"za", eq2:"Bosnia y Her.", code2:"ba", goles1:0, goles2:0, visto:false },
+    { id:5,  fecha:"24 Jun", grupo:"Grupo A", eq1:"Bosnia y Her.", code1:"ba", eq2:"México", code2:"mx", goles1:0, goles2:0, visto:false },
+    { id:6,  fecha:"24 Jun", grupo:"Grupo A", eq1:"Sudáfrica", code1:"za", eq2:"Canadá", code2:"ca", goles1:0, goles2:0, visto:false },
+
+    // GRUPO B
+    { id:7,  fecha:"11 Jun", grupo:"Grupo B", eq1:"Corea del Sur", code1:"kr", eq2:"Chequia", code2:"cz", goles1:0, goles2:0, visto:false },
+    { id:8,  fecha:"12 Jun", grupo:"Grupo B", eq1:"Uruguay", code1:"uy", eq2:"Irlanda", code2:"ie", goles1:0, goles2:0, visto:false },
+    { id:9,  fecha:"18 Jun", grupo:"Grupo B", eq1:"Corea del Sur", code1:"kr", eq2:"Uruguay", code2:"uy", goles1:0, goles2:0, visto:false },
+    { id:10, fecha:"18 Jun", grupo:"Grupo B", eq1:"Chequia", code1:"cz", eq2:"Irlanda", code2:"ie", goles1:0, goles2:0, visto:false },
+    { id:11, fecha:"24 Jun", grupo:"Grupo B", eq1:"Irlanda", code1:"ie", eq2:"Corea del Sur", code2:"kr", goles1:0, goles2:0, visto:false },
+    { id:12, fecha:"24 Jun", grupo:"Grupo B", eq1:"Chequia", code1:"cz", eq2:"Uruguay", code2:"uy", goles1:0, goles2:0, visto:false },
+
+    // GRUPO C
+    { id:13, fecha:"12 Jun", grupo:"Grupo C", eq1:"Estados Unidos", code1:"us", eq2:"Paraguay", code2:"py", goles1:0, goles2:0, visto:false },
+    { id:14, fecha:"13 Jun", grupo:"Grupo C", eq1:"Qatar", code1:"qa", eq2:"Suiza", code2:"ch", goles1:0, goles2:0, visto:false },
+    { id:15, fecha:"19 Jun", grupo:"Grupo C", eq1:"Estados Unidos", code1:"us", eq2:"Qatar", code2:"qa", goles1:0, goles2:0, visto:false },
+    { id:16, fecha:"19 Jun", grupo:"Grupo C", eq1:"Paraguay", code1:"py", eq2:"Suiza", code2:"ch", goles1:0, goles2:0, visto:false },
+    { id:17, fecha:"25 Jun", grupo:"Grupo C", eq1:"Suiza", code1:"ch", eq2:"Estados Unidos", code2:"us", goles1:0, goles2:0, visto:false },
+    { id:18, fecha:"25 Jun", grupo:"Grupo C", eq1:"Paraguay", code1:"py", eq2:"Qatar", code2:"qa", goles1:0, goles2:0, visto:false },
+
+    // GRUPO D
+    { id:19, fecha:"13 Jun", grupo:"Grupo D", eq1:"Brasil", code1:"br", eq2:"Marruecos", code2:"ma", goles1:0, goles2:0, visto:false },
+    { id:20, fecha:"13 Jun", grupo:"Grupo D", eq1:"Haití", code1:"ht", eq2:"Escocia", code2:"gb-sct", goles1:0, goles2:0, visto:false },
+    { id:21, fecha:"20 Jun", grupo:"Grupo D", eq1:"Brasil", code1:"br", eq2:"Haití", code2:"ht", goles1:0, goles2:0, visto:false },
+    { id:22, fecha:"20 Jun", grupo:"Grupo D", eq1:"Marruecos", code1:"ma", eq2:"Escocia", code2:"gb-sct", goles1:0, goles2:0, visto:false },
+    { id:23, fecha:"25 Jun", grupo:"Grupo D", eq1:"Escocia", code1:"gb-sct", eq2:"Brasil", code2:"br", goles1:0, goles2:0, visto:false },
+    { id:24, fecha:"25 Jun", grupo:"Grupo D", eq1:"Marruecos", code1:"ma", eq2:"Haití", code2:"ht", goles1:0, goles2:0, visto:false },
+
+    // GRUPO E
+    { id:25, fecha:"13 Jun", grupo:"Grupo E", eq1:"Australia", code1:"au", eq2:"Turquía", code2:"tr", goles1:0, goles2:0, visto:false },
+    { id:26, fecha:"14 Jun", grupo:"Grupo E", eq1:"Alemania", code1:"de", eq2:"Curazao", code2:"cw", goles1:0, goles2:0, visto:false },
+    { id:27, fecha:"21 Jun", grupo:"Grupo E", eq1:"Australia", code1:"au", eq2:"Alemania", code2:"de", goles1:0, goles2:0, visto:false },
+    { id:28, fecha:"21 Jun", grupo:"Grupo E", eq1:"Turquía", code1:"tr", eq2:"Curazao", code2:"cw", goles1:0, goles2:0, visto:false },
+    { id:29, fecha:"26 Jun", grupo:"Grupo E", eq1:"Curazao", code1:"cw", eq2:"Australia", code2:"au", goles1:0, goles2:0, visto:false },
+    { id:30, fecha:"26 Jun", grupo:"Grupo E", eq1:"Turquía", code1:"tr", eq2:"Alemania", code2:"de", goles1:0, goles2:0, visto:false },
+
+    // GRUPO F
+    { id:31, fecha:"14 Jun", grupo:"Grupo F", eq1:"Países Bajos", code1:"nl", eq2:"Japón", code2:"jp", goles1:0, goles2:0, visto:false },
+    { id:32, fecha:"14 Jun", grupo:"Grupo F", eq1:"Costa de Marfil", code1:"ci", eq2:"Ecuador", code2:"ec", goles1:0, goles2:0, visto:false },
+    { id:33, fecha:"21 Jun", grupo:"Grupo F", eq1:"Países Bajos", code1:"nl", eq2:"Costa de Marfil", code2:"ci", goles1:0, goles2:0, visto:false },
+    { id:34, fecha:"21 Jun", grupo:"Grupo F", eq1:"Japón", code1:"jp", eq2:"Ecuador", code2:"ec", goles1:0, goles2:0, visto:false },
+    { id:35, fecha:"26 Jun", grupo:"Grupo F", eq1:"Ecuador", code1:"ec", eq2:"Países Bajos", code2:"nl", goles1:0, goles2:0, visto:false },
+    { id:36, fecha:"26 Jun", grupo:"Grupo F", eq1:"Japón", code1:"jp", eq2:"Costa de Marfil", code2:"ci", goles1:0, goles2:0, visto:false },
+
+    // GRUPO G
+    { id:37, fecha:"14 Jun", grupo:"Grupo G", eq1:"Suecia", code1:"se", eq2:"Túnez", code2:"tn", goles1:0, goles2:0, visto:false },
+    { id:38, fecha:"15 Jun", grupo:"Grupo G", eq1:"España", code1:"es", eq2:"Cabo Verde", code2:"cv", goles1:0, goles2:0, visto:false },
+    { id:39, fecha:"22 Jun", grupo:"Grupo G", eq1:"España", code1:"es", eq2:"Suecia", code2:"se", goles1:0, goles2:0, visto:false },
+    { id:40, fecha:"22 Jun", grupo:"Grupo G", eq1:"Cabo Verde", code1:"cv", eq2:"Túnez", code2:"tn", goles1:0, goles2:0, visto:false },
+    { id:41, fecha:"26 Jun", grupo:"Grupo G", eq1:"Túnez", code1:"tn", eq2:"España", code2:"es", goles1:0, goles2:0, visto:false },
+    { id:42, fecha:"26 Jun", grupo:"Grupo G", eq1:"Cabo Verde", code1:"cv", eq2:"Suecia", code2:"se", goles1:0, goles2:0, visto:false },
+
+    // GRUPO H
+    { id:43, fecha:"15 Jun", grupo:"Grupo H", eq1:"Irán", code1:"ir", eq2:"Venezuela", code2:"ve", goles1:0, goles2:0, visto:false },
+    { id:44, fecha:"15 Jun", grupo:"Grupo H", eq1:"Francia", code1:"fr", eq2:"Jamaica", code2:"jm", goles1:0, goles2:0, visto:false },
+    { id:45, fecha:"22 Jun", grupo:"Grupo H", eq1:"Francia", code1:"fr", eq2:"Irán", code2:"ir", goles1:0, goles2:0, visto:false },
+    { id:46, fecha:"22 Jun", grupo:"Grupo H", eq1:"Jamaica", code1:"jm", eq2:"Venezuela", code2:"ve", goles1:0, goles2:0, visto:false },
+    { id:47, fecha:"27 Jun", grupo:"Grupo H", eq1:"Venezuela", code1:"ve", eq2:"Francia", code2:"fr", goles1:0, goles2:0, visto:false },
+    { id:48, fecha:"27 Jun", grupo:"Grupo H", eq1:"Jamaica", code1:"jm", eq2:"Irán", code2:"ir", goles1:0, goles2:0, visto:false },
+
+    // GRUPO I
+    { id:49, fecha:"15 Jun", grupo:"Grupo I", eq1:"Polonia", code1:"pl", eq2:"Argelia", code2:"dz", goles1:0, goles2:0, visto:false },
+    { id:50, fecha:"16 Jun", grupo:"Grupo I", eq1:"Italia", code1:"it", eq2:"Panamá", code2:"pa", goles1:0, goles2:0, visto:false },
+    { id:51, fecha:"22 Jun", grupo:"Grupo I", eq1:"Italia", code1:"it", eq2:"Polonia", code2:"pl", goles1:0, goles2:0, visto:false },
+    { id:52, fecha:"23 Jun", grupo:"Grupo I", eq1:"Panamá", code1:"pa", eq2:"Argelia", code2:"dz", goles1:0, goles2:0, visto:false },
+    { id:53, fecha:"27 Jun", grupo:"Grupo I", eq1:"Argelia", code1:"dz", eq2:"Italia", code2:"it", goles1:0, goles2:0, visto:false },
+    { id:54, fecha:"27 Jun", grupo:"Grupo I", eq1:"Panamá", code1:"pa", eq2:"Polonia", code2:"pl", goles1:0, goles2:0, visto:false },
+
+    // GRUPO J
+    { id:55, fecha:"16 Jun", grupo:"Grupo J", eq1:"Kenia", code1:"ke", eq2:"Bélgica", code2:"be", goles1:0, goles2:0, visto:false },
+    { id:56, fecha:"16 Jun", grupo:"Grupo J", eq1:"Inglaterra", code1:"gb-eng", eq2:"Perú", code2:"pe", goles1:0, goles2:0, visto:false },
+    { id:57, fecha:"23 Jun", grupo:"Grupo J", eq1:"Inglaterra", code1:"gb-eng", eq2:"Kenia", code2:"ke", goles1:0, goles2:0, visto:false },
+    { id:58, fecha:"23 Jun", grupo:"Grupo J", eq1:"Perú", code1:"pe", eq2:"Bélgica", code2:"be", goles1:0, goles2:0, visto:false },
+    { id:59, fecha:"27 Jun", grupo:"Grupo J", eq1:"Bélgica", code1:"be", eq2:"Inglaterra", code2:"gb-eng", goles1:0, goles2:0, visto:false },
+    { id:60, fecha:"27 Jun", grupo:"Grupo J", eq1:"Perú", code1:"pe", eq2:"Kenia", code2:"ke", goles1:0, goles2:0, visto:false },
+
+    // GRUPO K
+    { id:61, fecha:"16 Jun", grupo:"Grupo K", eq1:"Egipto", code1:"eg", eq2:"Ghana", code2:"gh", goles1:0, goles2:0, visto:false },
+    { id:62, fecha:"17 Jun", grupo:"Grupo K", eq1:"Argentina", code1:"ar", eq2:"Rumanía", code2:"ro", goles1:0, goles2:0, visto:false },
+    { id:63, fecha:"23 Jun", grupo:"Grupo K", eq1:"Argentina", code1:"ar", eq2:"Egipto", code2:"eg", goles1:0, goles2:0, visto:false },
+    { id:64, fecha:"24 Jun", grupo:"Grupo K", eq1:"Rumanía", code1:"ro", eq2:"Ghana", code2:"gh", goles1:0, goles2:0, visto:false },
+    { id:65, fecha:"27 Jun", grupo:"Grupo K", eq1:"Ghana", code1:"gh", eq2:"Argentina", code2:"ar", goles1:0, goles2:0, visto:false },
+    { id:66, fecha:"27 Jun", grupo:"Grupo K", eq1:"Rumanía", code1:"ro", eq2:"Egipto", code2:"eg", goles1:0, goles2:0, visto:false },
+
+    // GRUPO L
+    { id:67, fecha:"17 Jun", grupo:"Grupo L", eq1:"Omán", code1:"om", eq2:"Irak", code2:"iq", goles1:0, goles2:0, visto:false },
+    { id:68, fecha:"17 Jun", grupo:"Grupo L", eq1:"Portugal", code1:"pt", eq2:"Camerún", code2:"cm", goles1:0, goles2:0, visto:false },
+    { id:69, fecha:"24 Jun", grupo:"Grupo L", eq1:"Portugal", code1:"pt", eq2:"Omán", code2:"om", goles1:0, goles2:0, visto:false },
+    { id:70, fecha:"24 Jun", grupo:"Grupo L", eq1:"Camerún", code1:"cm", eq2:"Irak", code2:"iq", goles1:0, goles2:0, visto:false },
+    { id:71, fecha:"27 Jun", grupo:"Grupo L", eq1:"Irak", code1:"iq", eq2:"Portugal", code2:"pt", goles1:0, goles2:0, visto:false },
+    { id:72, fecha:"27 Jun", grupo:"Grupo L", eq1:"Camerún", code1:"cm", eq2:"Omán", code2:"om", goles1:0, goles2:0, visto:false }
 ];
 
 function cargar() {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) { const d = JSON.parse(raw); if (Array.isArray(d) && d.length) return d; }
+        if (raw) { const d = JSON.parse(raw); if (Array.isArray(d) && d.length === DEFAULTS.length) return d; }
     } catch(e) {}
     return DEFAULTS.map(p => ({...p}));
 }
@@ -131,7 +216,10 @@ function render() {
             <div class="card-header"><span>📅 ${p.fecha}</span><span>${p.grupo}</span></div>
             <div class="team-container">
                 <div class="team-row">
-                    <span>${p.equipo1}</span>
+                    <div class="team-info">
+                        <img class="flag-img" src="https://flagcdn.com/w40/${p.code1}.png" alt="${p.eq1}" onerror="this.style.display='none'">
+                        <span>${p.eq1}</span>
+                    </div>
                     <div class="score-control">
                         <button class="score-btn" onclick="cambiarGoles(${p.id},1,-1)">−</button>
                         <span class="score-number">${p.goles1}</span>
@@ -139,7 +227,10 @@ function render() {
                     </div>
                 </div>
                 <div class="team-row">
-                    <span>${p.equipo2}</span>
+                    <div class="team-info">
+                        <img class="flag-img" src="https://flagcdn.com/w40/${p.code2}.png" alt="${p.eq2}" onerror="this.style.display='none'">
+                        <span>${p.eq2}</span>
+                    </div>
                     <div class="score-control">
                         <button class="score-btn" onclick="cambiarGoles(${p.id},2,-1)">−</button>
                         <span class="score-number">${p.goles2}</span>
