@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Diario del Mundial 2026</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary: #0066cc;
+            --text: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 { margin-bottom: 5px; color: var(--primary); }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .partido-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+        .partido-card:hover {
+            transform: translateY(-2px);
+        }
+        .info {
+            flex: 1;
+        }
+        .fecha { font-size: 0.85em; color: #777; }
+        .equipos { font-weight: bold; font-size: 1.1em; margin: 5px 0; }
+        .marcador-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        input[type="number"] {
+            width: 45px;
+            padding: 5px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .visto-btn {
+            background-color: #ddd;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .visto-btn.visto {
+            background-color: #2ecc71;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏆 Mi Marcador del Mundial 2026</h1>
+        <p>Lista de partidos vistos y por ver</p>
+    </header>
+
+    <div class="container" id="lista-partidos">
+        <!-- Los partidos se generarán dinámicamente con JavaScript -->
+    </div>
+
+    <script>
+        // Lista con el calendario real jugado hasta el 15 de Junio
+        // Ya vienen preconfigurados con tus partidos vistos
+        const partidosIniciales = [
+            { id: 1, fecha: "11 de Junio", equipo1: "México 🇲🇽", equipo2: "Sudáfrica 🇿🇦", goles1: 2, goles2: 0, visto: true },
+            { id: 2, fecha: "11 de Junio", equipo1: "Corea del Sur 🇰🇷", equipo2: "Chequia 🇨🇿", goles1: 2, goles2: 1, visto: false },
+            { id: 3, fecha: "12 de Junio", equipo1: "Canadá 🇨🇦", equipo2: "Bosnia y Her. 🇧🇦", goles1: 1, goles2: 1, visto: true },
+            { id: 4, fecha: "12 de Junio", equipo1: "Estados Unidos 🇺🇸", equipo2: "Paraguay 🇵🇾", goles1: 4, goles2: 1, visto: false },
+            { id: 5, fecha: "13 de Junio", equipo1: "Qatar 🇶🇦", equipo2: "Suiza 🇨🇭", goles1: 1, goles2: 1, visto: true },
+            { id: 6, fecha: "13 de Junio", equipo1: "Brasil 🇧🇷", equipo2: "Marruecos 🇲🇦", goles1: 1, goles2: 1, visto: true },
+            { id: 7, fecha: "13 de Junio", equipo1: "Haití 🇭🇹", equipo2: "Escocia 🏴󠁧󠁢󠁳󠁣󠁴󠁿", goles1: 0, goles2: 1, visto: true },
+            { id: 8, fecha: "13 de Junio", equipo1: "Australia 🇦🇺", equipo2: "Turquía 🇹🇷", goles1: 2, goles2: 0, visto: false },
+            { id: 9, fecha: "14 de Junio", equipo1: "Alemania 🇩🇪", equipo2: "Curazao 🇨🇼", goles1: 7, goles2: 1, visto: true },
+            { id: 10, fecha: "14 de Junio", equipo1: "Países Bajos 🇳🇱", equipo2: "Japón 🇯🇵", goles1: 2, goles2: 2, visto: true },
+            { id: 11, fecha: "14 de Junio", equipo1: "Costa de Marfil 🇨🇮", equipo2: "Ecuador 🇪🇨", goles1: 1, goles2: 0, visto: true },
+            { id: 12, fecha: "14 de Junio", equipo1: "Suecia 🇸🇪", equipo2: "Túnez 🇹🇳", goles1: 5, goles2: 1, visto: false },
+            { id: 13, fecha: "15 de Junio", equipo1: "España 🇪🇸", equipo2: "Cabo Verde 🇨🇻", goles1: 0, goles2: 0, visto: true }
+        ];
+
+        // Cargar datos guardados del almacenamiento local (LocalStorage) o usar los iniciales
+        let partidos = JSON.parse(localStorage.getItem('mundial_partidos')) || partidosIniciales;
+
+        // Si es la primera vez que entras pero ya hay cambios en partidosIniciales, actualizamos el almacenamiento
+        if (!localStorage.getItem('mundial_partidos')) {
+            localStorage.setItem('mundial_partidos', JSON.stringify(partidosIniciales));
+        }
+
+        const container = document.getElementById('lista-partidos');
+
+        function renderPartidos() {
+            container.innerHTML = '';
+            partidos.forEach((p) => {
+                const card = document.createElement('div');
+                card.className = 'partido-card';
+                
+                const claseBoton = p.visto ? 'visto-btn visto' : 'visto-btn';
+                const textoBoton = p.visto ? '✓ Visto' : 'Marcar visto';
+
+                card.innerHTML = `
+                    <div class="info">
+                        <div class="fecha">${p.fecha}</div>
+                        <div class="equipos">${p.equipo1} vs ${p.equipo2}</div>
+                    </div>
+                    <div class="marcador-input">
+                        <input type="number" placeholder="-" value="${p.goles1 ?? ''}" onchange="guardarGoles(${p.id}, 1, this.value)">
+                        <span>-</span>
+                        <input type="number" placeholder="-" value="${p.goles2 ?? ''}" onchange="guardarGoles(${p.id}, 2, this.value)">
+                        <button class="${claseBoton}" onclick="toggleVisto(${p.id})">${textoBoton}</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Función para marcar/desmarcar como visto
+        window.toggleVisto = function(id) {
+            const partido = partidos.find(p => p.id === id);
+            partido.visto = !partido.visto;
+            actualizarStorage();
+        }
+
+        // Función para guardar los goles
+        window.guardarGoles = function(id, equipoNum, valor) {
+            const partido = partidos.find(p => p.id === id);
+            if(equipoNum === 1) partido.goles1 = valor === '' ? null : parseInt(valor);
+            if(equipoNum === 2) partido.goles2 = valor === '' ? null : parseInt(valor);
+            actualizarStorage(false);
+        }
+
+        function actualizarStorage(recargar = true) {
+            localStorage.setItem('mundial_partidos', JSON.stringify(partidos));
+            if (recargar) renderPartidos();
+        }
+
+        // Arrancar la web
+        renderPartidos();
+    </script>
+</body>
+</html>
